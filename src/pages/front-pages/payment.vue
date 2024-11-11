@@ -7,6 +7,15 @@ import visaDark from '@images/icons/payments/img/visa-dark.png'
 import visaLight from '@images/icons/payments/img/visa-light.png'
 import { useConfigStore } from '@core/stores/config'
 
+
+import { onMounted, reactive, ref } from 'vue'
+
+/* importamos axios**/
+import axios from 'axios'
+
+
+
+
 const visa = useGenerateImageVariant(visaLight, visaDark)
 const paypal = useGenerateImageVariant(paypalLight, paypalDark)
 const store = useConfigStore()
@@ -32,13 +41,129 @@ const radioContent = [
   },
 ]
 
+const items = [
+  'California',
+  'Colorado',
+  'Florida',
+  'Georgia',
+  'Texas',
+  'Wyoming',
+]
+
 const selectedRadio = ref('credit card')
 const selectedCountry = ref('USA')
 const isPricingPlanDialogVisible = ref(false)
+
+
+
+
+async function getCliente() {
+
+const valores =  { "id" :  1}
+
+
+
+
+//console.log (valores)
+//console.log (valores.value)
+
+ const respuesta = await axios.post(API_URL + 'getCliente',valores)
+
+ /* obtengo el valor para mnostrar en html */
+ sitios.value = respuesta.data
+  console.log('respuesta.data ', respuesta.data)
+ //console.log('respuesta.length ', respuesta.data.length)
+
+ checkoutSteps.splice(0) //borra la primera linea
+ for (let i = 0; i < respuesta.data.length; i++) {
+  // console.log(" i =",  i  )
+   // console.log("respuesta", respuesta.data[i].descripcion);
+    checkoutSteps.push({
+     title: respuesta.data[i].titulo,
+     id_padre: respuesta.data[i].id_padre,
+     glosa: respuesta.data[i].glosa,      
+     //icon: customTrending 
+   })
+   console.log("---------------------",respuesta.data[i].glosa)
+} 
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 
 <template>
   <!-- eslint-disable vue/attribute-hyphenation -->
+
+  <!-----------comienzo formulario----------------------------->
+  <div class="payment-page">
+<VContainer>
+  <div class="d-flex justify-center align-center payment-card"> 
+  <VCard width="100%">
+  <VForm @submit.prevent="() => {}">
+    <VRow>
+      <VCol cols="12">
+        <AppAutocomplete
+    label="Clientes"
+    :items="items"
+    placeholder="Seleccione Cliente"
+  />
+      </VCol>
+      <VCol cols="12">
+        <AppAutocomplete
+    label="Producto"
+    :items="items"
+    placeholder="Seleccione Producto"
+  />
+      </VCol>
+ 
+
+      <VCol cols="12">
+        <AppTextField
+          v-model="Cantidad"
+          label="Cantidad"
+          placeholder="1"
+          type="number"
+        />
+      </VCol>
+
+
+      <VCol
+        cols="12"
+        class="d-flex gap-4"
+      >
+        <VBtn type="submit">
+          Submit
+        </VBtn>
+
+        <VBtn
+          type="reset"
+          color="secondary"
+          variant="tonal"
+        >
+          Reset
+        </VBtn>
+      </VCol>
+    </VRow>
+  </VForm>
+
+  </VCard>
+</div>
+
+</VContainer>
+</div>
+<!-------------termino fomrulario ------------------------->
+
 
   <div class="payment-page">
     <!-- 👉 Navbar -->
