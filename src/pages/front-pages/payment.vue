@@ -13,7 +13,55 @@ import { onMounted, reactive, ref } from 'vue'
 /* importamos axios**/
 import axios from 'axios'
 
+// list
+import avatar1 from '@images/avatars/avatar-1.png'
+import avatar2 from '@images/avatars/avatar-2.png'
+import avatar3 from '@images/avatars/avatar-3.png'
+import avatar4 from '@images/avatars/avatar-4.png'
 
+/*** variable dialog popup */
+const isDialogVisible = ref(false)
+const pedidoId = ref('')
+const nroPedido = ref('')
+
+
+
+const users = [
+  {
+    avatar: avatar1,
+    name: 'Caroline Black',
+    status: 'Online',
+    lastVisited: '13 minutes ago',
+  },
+  {
+    avatar: avatar2,
+    name: 'Alfred Copeland',
+    status: 'Away',
+    lastVisited: '11 minutes ago',
+  },
+  {
+    avatar: avatar3,
+    name: 'Celia Schneider',
+    status: 'Offline',
+    lastVisited: '9 minutes ago',
+  },
+  {
+    avatar: avatar4,
+    name: 'Max Rogan',
+    status: 'In Meeting',
+    lastVisited: '28 minutes ago',
+  },
+]
+
+const resolveStatusColor = {
+  'Online': 'success',
+  'Away': 'warning',
+  'Offline': 'secondary',
+  'In Meeting': 'error',
+}
+
+
+/************************************************ */
 
 
 const visa = useGenerateImageVariant(visaLight, visaDark)
@@ -41,59 +89,153 @@ const radioContent = [
   },
 ]
 
-const items = [
-  'California',
-  'Colorado',
-  'Florida',
-  'Georgia',
-  'Texas',
-  'Wyoming',
-]
+//const items = ({})
+const items = reactive(['']) // arreglo
+const itemsProducto = reactive(['']) // 
+
+const arrProductos = ref([]) // arreglo
+const producto = ref([]) // arreglo
+
+const comentarios = ref('')
+const cantidadPro = ref()
+
 
 const selectedRadio = ref('credit card')
 const selectedCountry = ref('USA')
 const isPricingPlanDialogVisible = ref(false)
 
 
-
+const API_URL = import.meta.env.VITE_API_URL  
 
 async function getCliente() {
 
 const valores =  { "id" :  1}
 
-
-
-
-//console.log (valores)
-//console.log (valores.value)
-
- const respuesta = await axios.post(API_URL + 'getCliente',valores)
+ 
+ const respuesta = await axios.post(  API_URL + 'Listar_Clientes',valores)
 
  /* obtengo el valor para mnostrar en html */
- sitios.value = respuesta.data
-  console.log('respuesta.data ', respuesta.data)
- //console.log('respuesta.length ', respuesta.data.length)
+ //sitios.value = respuesta.data
+ // console.log('respuesta.data ', respuesta.data)
+ //console.log('respuesta.length ', respuesta.data.recordset.length)
 
- checkoutSteps.splice(0) //borra la primera linea
- for (let i = 0; i < respuesta.data.length; i++) {
+ //items.splice(0) //borra la primera linea
+ for (let i = 0; i < respuesta.data.recordset.length; i++) {
   // console.log(" i =",  i  )
    // console.log("respuesta", respuesta.data[i].descripcion);
-    checkoutSteps.push({
-     title: respuesta.data[i].titulo,
-     id_padre: respuesta.data[i].id_padre,
-     glosa: respuesta.data[i].glosa,      
+   items.push({
+     id: respuesta.data.recordset[i].id,
+     Nombres: respuesta.data.recordset[i].Nombres  
      //icon: customTrending 
    })
-   console.log("---------------------",respuesta.data[i].glosa)
+   //console.log("---------------------",respuesta.data[i].Nombres)
+} 
+
+}
+
+async function getProducto() {
+
+const valores =  { "id" :  1}
+
+ 
+ const respuesta = await axios.post(  API_URL + 'Listar_Detalle_Productos',valores)
+
+ /* obtengo el valor para mnostrar en html */
+ //sitios.value = respuesta.data
+  //console.log('respuesta.data ', respuesta.data)
+ //console.log('respuesta.length ', respuesta.data.recordset.length)
+
+ //items.splice(0) //borra la primera linea
+ for (let i = 0; i < respuesta.data.recordset.length; i++) {
+  // console.log(" i =",  i  )
+   // console.log("respuesta", respuesta.data[i].descripcion);
+   itemsProducto.push({
+     id: respuesta.data.recordset[i].id,
+     Nombre: respuesta.data.recordset[i].Nombre  
+     //icon: customTrending 
+   })
+   //console.log("---------------------",respuesta.data[i].Nombres)
 } 
 
 }
 
 
 
+async function getProductos() {
+  console.log('getProductos ')
+  const valores =  { "id" :  1}
+  const respuesta = await axios.post(  API_URL + 'Listar_Detalle_Productos', valores)
+  producto.value = respuesta.data.recordset
+  console.log('respuesta.data ', respuesta.data)
+  //console.log('respProductos',  respProductos)
+  // return respProductos
+}
+
+
+async function getNroPedido(idCliente) {
+  console.log('idCliente = ', idCliente)
+  const valores =  { "idCliente" :  idCliente.value}
+  const respuesta = await axios.post(  API_URL + 'Listar_Cabecerapedido', valores)
+  producto.value = respuesta.data.recordset
+  console.log('respuesta.data ', respuesta.data)
+  //console.log('respProductos',  respProductos)
+  // return respProductos
+}
 
 
 
+
+const addProductos = () => {
+  //console.log(selectedCli.value)
+  console.log('selected.value ', SelectedPro.value)
+  console.log('selected.split ', SelectedPro.value.split('|')[0]) /
+    arrProductos.value.push({
+      idCliente: SelectedCli.value,
+      id: SelectedPro.value.split('|')[0],
+      Nombre: SelectedPro.value.split('|')[1],
+      Precio: SelectedPro.value.split('|')[2],
+      idMedida: SelectedPro.value.split('|')[3],
+      Comentario: comentarios.value,
+      Cantidad: cantidadPro.value,
+      subTotal: parseInt(cantidadPro.value) * parseInt(SelectedPro.value.split('|')[2]),
+      idPedido: 0
+    })
+  // arrProductos.value.push({ name: 'Banana', amount: 4 })
+  //nuevProducto.value = ''
+}
+
+const borrarProductos = (index) => {
+  arrProductos.value.splice(index, 1) // se elimia 1 solo elemento
+}
+
+
+async function addPedido() {
+  console.log(arrProductos)
+  console.log(arrProductos.value)
+  
+  const respuesta = await axios.post(API_URL + 'Insertar_CabeceraPedido', arrProductos.value)
+  pedidoId.value = respuesta.data
+  nroPedido.value = respuesta.data
+  console.log('respuesta.data.recordset : ', respuesta.data)
+
+  isDialogVisible.value = true
+  
+  //console.log('respProductos',  respProductos)
+  // return respProductos
+}
+
+let SelectedPro = ref(producto.value[0])
+let SelectedCli = ref(items[0])
+
+onMounted (async ()=> {
+
+getCliente() 
+getProductos()
+
+
+
+
+})
 
 
 
@@ -114,26 +256,56 @@ const valores =  { "id" :  1}
     <VRow>
       <VCol cols="12">
         <AppAutocomplete
+        v-model="SelectedCli"
     label="Clientes"
     :items="items"
     placeholder="Seleccione Cliente"
+    item-title="Nombres" 
+    item-value="id"  
+    @click="getNroPedido( option.title )"
   />
       </VCol>
       <VCol cols="12">
         <AppAutocomplete
-    label="Producto"
+        v-model="SelectedNropedido"
+    label="Nro Pedido"
     :items="items"
+    placeholder="Seleccione Pedido"
+    item-title="Nombres"
+    item-value="id"
+  />
+      </VCol>
+      <VCol cols="12">
+        <AppAutocomplete
+        v-model="SelectedPro"
+    label="Producto"
+    :items="producto"
+    item-title="Nombre"
+    item-value="Contenido"    
     placeholder="Seleccione Producto"
   />
+  <VBtn 
+         
+        @click="addProductos">
+        Consultar 
+        </VBtn>
       </VCol>
  
 
       <VCol cols="12">
         <AppTextField
-          v-model="Cantidad"
+          v-model="cantidadPro"
           label="Cantidad"
           placeholder="1"
           type="number"
+        />
+      </VCol>
+      <VCol cols="12">
+        <AppTextField
+          v-model="comentarios"
+          label="Comentario"
+          placeholder="Comentario"
+          type="text"
         />
       </VCol>
 
@@ -142,17 +314,22 @@ const valores =  { "id" :  1}
         cols="12"
         class="d-flex gap-4"
       >
-        <VBtn type="submit">
-          Submit
+        <VBtn 
+         
+        @click="addProductos">
+        Agregar 
         </VBtn>
 
-        <VBtn
-          type="reset"
-          color="secondary"
-          variant="tonal"
+        <VBtn   @click="addPedido"
         >
-          Reset
+        Guardar 
         </VBtn>
+        <!-- Activator
+     
+      <VBtn v-bind="props" @click="isDialogVisible = true">
+        Click Me
+      </VBtn>
+       -->
       </VCol>
     </VRow>
   </VForm>
@@ -160,246 +337,94 @@ const valores =  { "id" :  1}
   </VCard>
 </div>
 
+<!-------------termino fomrulario ------------------------->
+
+<!---------------List------------------------------------------>
+<VList
+    lines="three"
+    border
+  >
+    <template
+      v-for="(prod, index) of arrProductos"
+      :key="index"
+    >
+      <VListItem>
+         
+        <VListItemTitle>
+          {{ prod.Nombre  }}  
+        </VListItemTitle>
+        <VListItemSubtitle class="mt-1">
+          <span class="text-xs ">Cantidad: {{ prod.Cantidad}}</span> 
+          {{ ' - ' }}  
+          <span class="text-xs ">Valor:  {{ Number(prod.Precio).toLocaleString('en-US') }}</span>
+          {{ ' - ' }}  
+          <span class="text-xs ">Total: {{ Number(prod.subTotal).toLocaleString('en-US') }}</span>
+           <br>
+          <span class="text-xs ">Comentario: {{  prod.Comentario }}</span>
+        </VListItemSubtitle>
+
+        <template #append>
+          <VBtn size="small" @click="borrarProductos(index)">
+            X
+          </VBtn>
+        </template>
+      </VListItem>
+      <VDivider v-if="index !== users.length - 1" />
+    </template>
+  </VList>
+  
 </VContainer>
 </div>
-<!-------------termino fomrulario ------------------------->
+<!------------------------------------------------------->
+
+
+
 
 
   <div class="payment-page">
     <!-- 👉 Navbar -->
     <Navbar />
 
-    <!-- 👉 Payment card  -->
-    <VContainer>
-      <div class="d-flex justify-center align-center payment-card">
-        <VCard width="100%">
-          <VRow>
-            <VCol
-              cols="12"
-              md="7"
-              :class="$vuetify.display.mdAndUp ? 'border-e' : 'border-b'"
-            >
-              <VCardText class="pa-8 pe-5">
-                <!-- Checkout header -->
-                <div>
-                  <h4 class="text-h4 mb-2">
-                    Checkout
-                  </h4>
-                  <div class="text-body-1">
-                    All plans include 40+ advanced tools and features to boost your product. Choose the best plan to fit your needs.
-                  </div>
-                </div>
+    
 
-                <CustomRadios
-                  v-model:selected-radio="selectedRadio"
-                  :radio-content="radioContent"
-                  :grid-column="{ cols: '12', sm: '6' }"
-                  class="my-8"
-                >
-                  <template #default="{ item }">
-                    <div class="d-flex align-center gap-x-4 ms-3">
-                      <img
-                        :src="item.images"
-                        height="34"
-                      >
-                      <h6 class="text-h6">
-                        {{ item.title }}
-                      </h6>
-                    </div>
-                  </template>
-                </CustomRadios>
-
-                <!-- billing Details -->
-                <div class="mb-8">
-                  <h4 class="text-h4 mb-6">
-                    Billing Details
-                  </h4>
-                  <VForm>
-                    <VRow>
-                      <VCol
-                        cols="12"
-                        md="6"
-                      >
-                        <AppTextField
-                          label="Email Address"
-                          type="email"
-                          placeholder="johndoe@email.com"
-                        />
-                      </VCol>
-                      <VCol
-                        cols="12"
-                        md="6"
-                      >
-                        <AppTextField
-                          label="Password"
-                          type="password"
-                          placeholder="············"
-                          autocomplete="on"
-                        />
-                      </VCol>
-                      <VCol
-                        cols="12"
-                        md="6"
-                      >
-                        <AppSelect
-                          v-model="selectedCountry"
-                          label="Billing Country"
-                          :items="['USA', 'Canada', 'UK', 'AUS']"
-                        />
-                      </VCol>
-                      <VCol
-                        cols="12"
-                        md="6"
-                      >
-                        <AppTextField
-                          label="Billing Zip/Postal Code"
-                          type="number"
-                          placeholder="129211"
-                        />
-                      </VCol>
-                    </VRow>
-                  </VForm>
-                </div>
-
-                <!-- Credit card info -->
-                <div
-                  class="mb-8"
-                  :class="selectedRadio === 'paypal' ? 'd-none' : 'd-block'"
-                >
-                  <h4 class="text-h4 mb-6">
-                    Credit Card Info
-                  </h4>
-                  <VRow>
-                    <VCol cols="12">
-                      <AppTextField
-                        label="Card Number"
-                        placeholder="8787 2345 3458"
-                        type="number"
-                      />
-                    </VCol>
-
-                    <VCol
-                      cols="12"
-                      md="4"
-                    >
-                      <AppTextField
-                        label="Card Holder"
-                        placeholder="John Doe"
-                      />
-                    </VCol>
-
-                    <VCol
-                      cols="12"
-                      md="4"
-                    >
-                      <AppTextField
-                        label="Exp. date"
-                        placeholder="05/2020"
-                      />
-                    </VCol>
-
-                    <VCol
-                      cols="12"
-                      md="4"
-                    >
-                      <AppTextField
-                        label="CVV"
-                        type="number"
-                        placeholder="784"
-                      />
-                    </VCol>
-                  </VRow>
-                </div>
-              </VCardText>
-            </VCol>
-
-            <VCol
-              cols="12"
-              md="5"
-            >
-              <VCardText class="pa-8 ps-5">
-                <!-- order summary -->
-                <div class="mb-8">
-                  <h4 class="text-h4 mb-2">
-                    Order Summary
-                  </h4>
-                  <div class="text-body-1">
-                    It can help you manage and service orders before, during, and after fulfillment.
-                  </div>
-                </div>
-
-                <VCard
-                  flat
-                  color="rgba(var(--v-theme-on-surface), var(--v-hover-opacity))"
-                >
-                  <VCardText>
-                    <div class="text-body-1">
-                      A simple start for everyone
-                    </div>
-                    <h1 class="text-h1 my-4">
-                      $59.99<span class="text-body-1 font-weight-medium">/month</span>
-                    </h1>
-                    <VBtn
-                      variant="tonal"
-                      block
-                      @click="isPricingPlanDialogVisible = !isPricingPlanDialogVisible"
-                    >
-                      Change Plan
-                    </VBtn>
-                  </VCardText>
-                </VCard>
-
-                <div class="my-5">
-                  <div class="d-flex justify-space-between mb-2">
-                    <span>Subscription</span>
-                    <h6 class="text-h6">
-                      $85.99
-                    </h6>
-                  </div>
-                  <div class="d-flex justify-space-between">
-                    <span>Tax</span>
-                    <h6 class="text-h6">
-                      $4.99
-                    </h6>
-                  </div>
-                  <VDivider class="my-4" />
-                  <div class="d-flex justify-space-between">
-                    <span>Total</span>
-                    <h6 class="text-h6">
-                      $90.98
-                    </h6>
-                  </div>
-                </div>
-
-                <VBtn
-                  block
-                  color="success"
-                  class="mb-8"
-                >
-                  <template #append>
-                    <VIcon
-                      icon="tabler-arrow-right"
-                      class="flip-in-rtl"
-                    />
-                  </template>
-                  Proceed With Payment
-                </VBtn>
-
-                <div class="text-body-1">
-                  By continuing, you accept to our Terms of Services and Privacy Policy. Please note that payments are non-refundable.
-                </div>
-              </VCardText>
-            </VCol>
-          </VRow>
-        </VCard>
-      </div>
-    </VContainer>
-
-    <!-- 👉 Footer -->
+    <!-- 👉 Footer 
     <Footer />
-
+    -->
+<!--
     <PricingPlanDialog v-model:is-dialog-visible="isPricingPlanDialogVisible" />
+    -->
   </div>
+
+
+<!---------------------------------------------------->
+<VDialog
+    v-model="isDialogVisible"
+    width="500"
+  >
+    
+     
+
+    <!-- Dialog close btn -->
+    <DialogCloseBtn @click="isDialogVisible = !isDialogVisible" />
+
+    <!-- Dialog Content -->
+    <VCard title="Creación de Pedido">
+      <VCardText>
+        Nuevo Nro de pedido es : {{ pedidoId }}
+      </VCardText>
+
+      <VCardText class="d-flex justify-end">
+        <VBtn @click="isDialogVisible = false">
+          Cerrar
+        </VBtn>
+      </VCardText>
+    </VCard>
+  </VDialog>
+
+
+
+<!------------------------------------------------------>
+
 </template>
 
 <style lang="scss" scoped>
