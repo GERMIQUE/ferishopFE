@@ -92,6 +92,9 @@ const radioContent = [
 //const items = ({})
 const items = reactive(['']) // arreglo
 const itemsProducto = reactive(['']) // 
+const itemsPedidos = ref([]) // 
+
+const SelectedNropedido = ref() // 
 
 const arrProductos = ref([]) // arreglo
 const producto = ref([]) // arreglo
@@ -174,11 +177,20 @@ async function getProductos() {
 
 async function getNroPedido(idCliente) {
   console.log('idCliente = ', idCliente)
-  const valores =  { "idCliente" :  idCliente.value}
+  const valores =  { "idCliente" :  idCliente}
+  SelectedNropedido.value =""
+
   const respuesta = await axios.post(  API_URL + 'Listar_Cabecerapedido', valores)
-  producto.value = respuesta.data.recordset
+ 
+  itemsPedidos.value = respuesta.data.recordset
+  /*
+  itemsPedidos.value.push({
+  Pagado : "Seleccione Pedido",
+  id:"0"
+
+  })*/
   console.log('respuesta.data ', respuesta.data)
-  //console.log('respProductos',  respProductos)
+   console.log('itemsPedidos.value',  itemsPedidos.value)
   // return respProductos
 }
 
@@ -203,6 +215,36 @@ const addProductos = () => {
   // arrProductos.value.push({ name: 'Banana', amount: 4 })
   //nuevProducto.value = ''
 }
+async function getPedidos ()   {
+
+  const valores =  { "nropedid" :  SelectedNropedido.value}
+  const respuesta = await axios.post(  API_URL + 'Listar_detallePedido', valores)
+  
+  arrProductos.value.splice(0)
+  for (let i = 0; i < respuesta.data.recordset.length; i++) {
+   
+   arrProductos.value.push({
+      idCliente: respuesta.data.recordset[i].idCliente,
+      id: respuesta.data.recordset[i].IDPEDIDO,
+      Nombre: respuesta.data.recordset[i].NombreProducto,
+      Precio: respuesta.data.recordset[i].PRECIO,
+      idMedida: respuesta.data.recordset[i].PRECIO,
+      Comentario: respuesta.data.recordset[i].comentario,
+      Cantidad: respuesta.data.recordset[i].CANTIDAD,
+      subTotal: respuesta.data.recordset[i].TOTAL,
+      idPedido: respuesta.data.recordset[i].idCabecera
+    })
+
+
+
+   
+  }
+   
+}
+
+
+
+
 
 const borrarProductos = (index) => {
   arrProductos.value.splice(index, 1) // se elimia 1 solo elemento
@@ -261,19 +303,31 @@ getProductos()
     :items="items"
     placeholder="Seleccione Cliente"
     item-title="Nombres" 
-    item-value="id"  
-    @click="getNroPedido( option.title )"
+    item-value="id"
+    @click="getNroPedido( SelectedCli )"
+     
+     
+     
+
+     
+     
+    
   />
       </VCol>
       <VCol cols="12">
         <AppAutocomplete
         v-model="SelectedNropedido"
     label="Nro Pedido"
-    :items="items"
+    :items="itemsPedidos"
     placeholder="Seleccione Pedido"
-    item-title="Nombres"
+    item-title="Pagado"
     item-value="id"
   />
+  <VBtn 
+         
+        @click="getPedidos()">
+        Consultar Pedido
+        </VBtn>
       </VCol>
       <VCol cols="12">
         <AppAutocomplete
@@ -284,11 +338,7 @@ getProductos()
     item-value="Contenido"    
     placeholder="Seleccione Producto"
   />
-  <VBtn 
-         
-        @click="addProductos">
-        Consultar 
-        </VBtn>
+  
       </VCol>
  
 
