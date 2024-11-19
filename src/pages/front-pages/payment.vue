@@ -183,12 +183,12 @@ async function getNroPedido(idCliente) {
   const respuesta = await axios.post(  API_URL + 'Listar_Cabecerapedido', valores)
  
   itemsPedidos.value = respuesta.data.recordset
-  /*
+   
   itemsPedidos.value.push({
   Pagado : "Seleccione Pedido",
   id:"0"
 
-  })*/
+  }) 
   console.log('respuesta.data ', respuesta.data)
    console.log('itemsPedidos.value',  itemsPedidos.value)
   // return respProductos
@@ -204,6 +204,7 @@ const addProductos = () => {
     arrProductos.value.push({
       idCliente: SelectedCli.value,
       id: SelectedPro.value.split('|')[0],
+      idProducto: SelectedPro.value.split('|')[0],
       Nombre: SelectedPro.value.split('|')[1],
       Precio: SelectedPro.value.split('|')[2],
       idMedida: SelectedPro.value.split('|')[3],
@@ -225,7 +226,8 @@ async function getPedidos ()   {
    
    arrProductos.value.push({
       idCliente: respuesta.data.recordset[i].idCliente,
-      id: respuesta.data.recordset[i].IDPEDIDO,
+      id: respuesta.data.recordset[i].IDPRODUCTO,
+      idProducto: respuesta.data.recordset[i].IDPRODUCTO,
       Nombre: respuesta.data.recordset[i].NombreProducto,
       Precio: respuesta.data.recordset[i].PRECIO,
       idMedida: respuesta.data.recordset[i].PRECIO,
@@ -251,7 +253,22 @@ const borrarProductos = (index) => {
 }
 
 
-async function ActualizaraddPedido() {
+async function ActualizarPedido() {
+  console.log(arrProductos)
+  console.log(arrProductos.value)
+  
+  const respuesta = await axios.post(API_URL + 'Actualizar_CabeceraPedido', arrProductos.value)
+  pedidoId.value = respuesta.data
+  nroPedido.value = respuesta.data
+  console.log('respuesta.data.recordset : ', respuesta.data)
+
+  isDialogVisible.value = true
+  
+  //console.log('respProductos',  respProductos)
+  // return respProductos
+}
+
+async function InsertarPedido() {
   console.log(arrProductos)
   console.log(arrProductos.value)
   
@@ -265,25 +282,37 @@ async function ActualizaraddPedido() {
   //console.log('respProductos',  respProductos)
   // return respProductos
 }
-
-
-
 
 
 async function addPedido() {
-  console.log(arrProductos)
-  console.log(arrProductos.value)
-  
-  const respuesta = await axios.post(API_URL + 'Insertar_CabeceraPedido', arrProductos.value)
-  pedidoId.value = respuesta.data
-  nroPedido.value = respuesta.data
-  console.log('respuesta.data.recordset : ', respuesta.data)
 
-  isDialogVisible.value = true
-  
-  //console.log('respProductos',  respProductos)
-  // return respProductos
+
+if((SelectedNropedido.value == "0") || (SelectedNropedido.value == "") ){
+ // console.log("InsertarPedido")
+  InsertarPedido() 
 }
+else{
+  console.log("ActualizarPedido")
+  ActualizarPedido() 
+
+}
+
+/*
+console.log(arrProductos)
+console.log(arrProductos.value)
+
+const respuesta = await axios.post(API_URL + 'Insertar_CabeceraPedido', arrProductos.value)
+pedidoId.value = respuesta.data
+nroPedido.value = respuesta.data
+console.log('respuesta.data.recordset : ', respuesta.data)
+
+isDialogVisible.value = true
+*/
+//console.log('respProductos',  respProductos)
+// return respProductos
+}
+
+
 
 let SelectedPro = ref(producto.value[0])
 let SelectedCli = ref(items[0])
@@ -297,6 +326,10 @@ getProductos()
 
 
 })
+
+
+
+ 
 
 
 
