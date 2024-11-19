@@ -210,7 +210,7 @@ const addProductos = () => {
       Comentario: comentarios.value,
       Cantidad: cantidadPro.value,
       subTotal: parseInt(cantidadPro.value) * parseInt(SelectedPro.value.split('|')[2]),
-      idPedido: 0
+      idPedido: SelectedNropedido.value
     })
   // arrProductos.value.push({ name: 'Banana', amount: 4 })
   //nuevProducto.value = ''
@@ -249,6 +249,25 @@ async function getPedidos ()   {
 const borrarProductos = (index) => {
   arrProductos.value.splice(index, 1) // se elimia 1 solo elemento
 }
+
+
+async function ActualizaraddPedido() {
+  console.log(arrProductos)
+  console.log(arrProductos.value)
+  
+  const respuesta = await axios.post(API_URL + 'Insertar_CabeceraPedido', arrProductos.value)
+  pedidoId.value = respuesta.data
+  nroPedido.value = respuesta.data
+  console.log('respuesta.data.recordset : ', respuesta.data)
+
+  isDialogVisible.value = true
+  
+  //console.log('respProductos',  respProductos)
+  // return respProductos
+}
+
+
+
 
 
 async function addPedido() {
