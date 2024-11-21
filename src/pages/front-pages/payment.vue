@@ -8,7 +8,7 @@ import visaLight from '@images/icons/payments/img/visa-light.png'
 import { useConfigStore } from '@core/stores/config'
 
 
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref,watchEffect,watch  } from 'vue'
 
 /* importamos axios**/
 import axios from 'axios'
@@ -176,6 +176,9 @@ async function getProductos() {
 
 
 async function getNroPedido(idCliente) {
+
+  arrProductos.value.splice(0)
+
   console.log('idCliente = ', idCliente)
   const valores =  { "idCliente" :  idCliente}
   SelectedNropedido.value =""
@@ -189,8 +192,9 @@ async function getNroPedido(idCliente) {
   id:"0"
 
   }) 
-  console.log('respuesta.data ', respuesta.data)
-   console.log('itemsPedidos.value',  itemsPedidos.value)
+  SelectedNropedido.value = "0"
+ // console.log('respuesta.data ', respuesta.data)
+  // console.log('itemsPedidos.value',  itemsPedidos.value)
   // return respProductos
 }
 
@@ -199,8 +203,8 @@ async function getNroPedido(idCliente) {
 
 const addProductos = () => {
   //console.log(selectedCli.value)
-  console.log('selected.value ', SelectedPro.value)
-  console.log('selected.split ', SelectedPro.value.split('|')[0]) /
+  //console.log('selected.value ', SelectedPro.value)
+  //console.log('selected.split ', SelectedPro.value.split('|')[0]) /
     arrProductos.value.push({
       idCliente: SelectedCli.value,
       id: SelectedPro.value.split('|')[0],
@@ -314,6 +318,12 @@ isDialogVisible.value = true
 
 
 
+
+ 
+
+ 
+
+
 let SelectedPro = ref(producto.value[0])
 let SelectedCli = ref(items[0])
 
@@ -327,11 +337,31 @@ getProductos()
 
 })
 
+ 
+watch(SelectedCli, async (newO,oldO) => {
+  
+  // if(newO && newO.length > 1){
+    // console.log("Valor  de newO = " , newO)
+     getNroPedido( newO )
 
+   //}
+  
+
+})
 
  
 
 
+watchEffect(() => {
+  // Se activa de forma inmediata y cuando name o surname cambie
+  // Haz algo (side effects) 👁
+ // console.log(SelectedCli.value);
+  
+});
+
+ 
+ 
+  
 
 
 
@@ -356,12 +386,7 @@ getProductos()
     placeholder="Seleccione Cliente"
     item-title="Nombres" 
     item-value="id"
-    @click="getNroPedido( SelectedCli )"
-     
-     
-     
-
-     
+    @focus="SelectedCli=''"     
      
     
   />
@@ -374,6 +399,7 @@ getProductos()
     placeholder="Seleccione Pedido"
     item-title="Pagado"
     item-value="id"
+
   />
   <VBtn 
          
@@ -389,6 +415,7 @@ getProductos()
     item-title="Nombre"
     item-value="Contenido"    
     placeholder="Seleccione Producto"
+    @focus="SelectedPro=''" 
   />
   
       </VCol>
