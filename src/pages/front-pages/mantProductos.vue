@@ -389,35 +389,7 @@ watchEffect(() => {
   <VCard width="100%">
   <VForm @submit.prevent="() => {}">
     <VRow>
-      <VCol cols="12">
-        <AppAutocomplete
-        v-model="SelectedCli"
-    label="Clientes"
-    :items="items"
-    placeholder="Seleccione Cliente"
-    item-title="Nombres" 
-    item-value="id"
-    @focus="SelectedCli=''"     
      
-    
-  />
-      </VCol>
-      <VCol cols="12">
-        <AppAutocomplete
-        v-model="SelectedNropedido"
-    label="Nro Pedido"
-    :items="itemsPedidos"
-    placeholder="Seleccione Pedido"
-    item-title="Pagado"
-    item-value="id"
-
-  />
-  <VBtn 
-         
-        @click="getPedidos()">
-        Consultar Pedido
-        </VBtn>
-      </VCol>
       <VCol cols="12">
         <AppAutocomplete
         v-model="SelectedPro"

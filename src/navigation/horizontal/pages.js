@@ -103,6 +103,7 @@ export default [
             to: 'front-pages-payment',
             target: '_blank',
           },
+         
           {
             title: 'Checkout',
             to: 'front-pages-checkout',
